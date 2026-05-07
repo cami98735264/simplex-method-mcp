@@ -1,0 +1,38 @@
+{
+  "name": "Problema 3 - Fábrica de congeladores A y B",
+  "objective": "max",
+  "variables": ["X1", "X2"],
+  "objective_coefficients": [22, 20],
+  "constraints": [
+    {
+      "name": "Horas de ensamblaje disponibles",
+      "coefficients": [2.5, 3],
+      "sign": "<=",
+      "rhs": 4500
+    },
+    {
+      "name": "Esmalte disponible para pintado",
+      "coefficients": [3, 6],
+      "sign": "<=",
+      "rhs": 8400
+    },
+    {
+      "name": "Horas de control de calidad",
+      "coefficients": [14, 10],
+      "sign": "<=",
+      "rhs": 20000
+    },
+    {
+      "name": "Demanda semanal total",
+      "coefficients": [1, 1],
+      "sign": "<=",
+      "rhs": 1700
+    },
+    {
+      "name": "Demanda mínima de congeladores tipo A",
+      "coefficients": [1, 0],
+      "sign": ">=",
+      "rhs": 600
+    }
+  ]
+}

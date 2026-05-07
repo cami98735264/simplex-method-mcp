@@ -1,0 +1,29 @@
+# --- Node / mcp-server ---
+node_modules/
+dist/
+build/
+.wrangler/
+.dev.vars
+*.log
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# --- Editor / OS ---
+.DS_Store
+.idea/
+.vscode/
+
+# --- Claude Code local settings (machine-specific paths, personal allowlists) ---
+.claude/
+
+# --- MCP client config: contains a live bearer token; ship .mcp.json.example instead ---
+.mcp.json
+
+# --- Stray empty file ---
+npx

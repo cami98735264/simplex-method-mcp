@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "simplex": {
+      "type": "http",
+      "url": "https://YOUR-WORKER-NAME.workers.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MCP_AUTH_TOKEN_HERE"
+      }
+    }
+  }
+}

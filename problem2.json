@@ -1,0 +1,20 @@
+{
+  "name": "Problema 2 - Compañía de Combustibles",
+  "objective": "min",
+  "variables": ["X1", "X2"],
+  "objective_coefficients": [3, 4],
+  "constraints": [
+    {
+      "name": "Disp. máxima de horas máquina",
+      "coefficients": [4, 4],
+      "sign": "<=",
+      "rhs": 16
+    },
+    {
+      "name": "Disp. mínima de litros de petróleo",
+      "coefficients": [4, 12],
+      "sign": ">=",
+      "rhs": 24
+    }
+  ]
+}

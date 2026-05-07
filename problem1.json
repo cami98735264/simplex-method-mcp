@@ -1,0 +1,32 @@
+{
+  "name": "Problema 1 - Reddy Miks Company",
+  "objective": "max",
+  "variables": ["X1", "X2"],
+  "objective_coefficients": [3000, 2000],
+  "constraints": [
+    {
+      "name": "Disp. máxima de materia prima A",
+      "coefficients": [1, 2],
+      "sign": "<=",
+      "rhs": 6
+    },
+    {
+      "name": "Disp. máxima de materia prima B",
+      "coefficients": [2, 1],
+      "sign": "<=",
+      "rhs": 8
+    },
+    {
+      "name": "Demanda de pintura para exteriores",
+      "coefficients": [-1, 1],
+      "sign": "<=",
+      "rhs": 1
+    },
+    {
+      "name": "Demanda de pintura para interiores",
+      "coefficients": [0, 1],
+      "sign": "<=",
+      "rhs": 2
+    }
+  ]
+}
