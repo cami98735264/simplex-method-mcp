@@ -153,6 +153,15 @@ export default {
       });
     }
 
-    return new Response("not found", { status: 404 });
+    // OAuth-aware clients (Claude.ai's custom-connector login) probe
+    // /.well-known/oauth-authorization-server, /.well-known/oauth-protected-resource,
+    // etc. and JSON.parse the body of any non-2xx response as an RFC 6749 error.
+    // A plain-text "not found" body crashes that parser with
+    // `Unexpected identifier "not"`. Returning a JSON-shaped error lets the
+    // client recognize "no OAuth here" cleanly instead of bubbling a parse error.
+    return new Response(
+      JSON.stringify({ error: "not_found", error_description: "not found" }),
+      { status: 404, headers: { "Content-Type": "application/json" } },
+    );
   },
 } satisfies ExportedHandler<Env>;
