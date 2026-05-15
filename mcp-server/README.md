@@ -75,7 +75,9 @@ Once-per-account setup:
 
 ```bash
 npx wrangler r2 bucket create simplex-xlsx
-npx wrangler secret put SIGNING_SECRET    # paste any 32+ char random string
+npx wrangler kv namespace create OAUTH_KV         # paste the printed id into wrangler.jsonc
+npx wrangler secret put SIGNING_SECRET            # any 32+ char random string (signs xlsx URLs)
+npx wrangler secret put MCP_PASSWORD              # shared password the /authorize screen prompts for
 ```
 
 Deploy:
@@ -85,7 +87,7 @@ npx wrangler deploy
 ```
 
 Wrangler prints the deployed URL (e.g. `https://simplex-mcp.<account>.workers.dev`).
-Add `<that URL>/mcp` as a remote MCP server in your client.
+Add `<that URL>/mcp` as a remote MCP server in your client (see **Auth** below).
 
 ### What gets deployed
 
@@ -94,12 +96,55 @@ Add `<that URL>/mcp` as a remote MCP server in your client.
 - a Durable Object binding `MCP_OBJECT` → class `SimplexMCP` (per-session state
   for the `McpAgent`),
 - an R2 bucket binding `XLSX_BUCKET` → `simplex-xlsx` (xlsx persistence),
+- a KV namespace binding `OAUTH_KV` → OAuth client/grant/token storage,
 - the `nodejs_compat` flag (Web Crypto + `node:buffer` interop),
-- a SQLite migration (`v1`) for the Durable Object class.
+- a SQLite migration (`v1`) for the Durable Object class,
+- an hourly Cron Trigger that calls `OAuthProvider.purgeExpiredData()` to evict
+  orphaned grants/tokens (KV TTLs already handle expiry; this is defense-in-depth).
 
 `SIGNING_SECRET` is a Worker secret used only for HMAC-signing the
 `/download/<key>?exp=<ts>&sig=<mac>` URLs; rotating it invalidates all
-outstanding download links.
+outstanding download links. `MCP_PASSWORD` is the shared password the
+`/authorize` consent screen prompts for; rotating it invalidates nothing
+on its own — existing access tokens remain valid until their TTL — but
+any new login flow will require the new value.
+
+### Auth
+
+The server is gated by OAuth 2.1 (RFC 6749 + RFC 7636 PKCE + RFC 7591 dynamic
+client registration) via `@cloudflare/workers-oauth-provider`. Endpoints
+exposed:
+
+| Path                                            | Purpose                                                  |
+|-------------------------------------------------|----------------------------------------------------------|
+| `/.well-known/oauth-authorization-server`       | RFC 8414 authorization server metadata                   |
+| `/.well-known/oauth-protected-resource/mcp`     | RFC 9728 protected resource metadata                     |
+| `/register`                                     | RFC 7591 dynamic client registration                     |
+| `/authorize`                                    | Login screen (shared password) + grant issuance          |
+| `/token`                                        | Token exchange + refresh + revocation                    |
+| `/mcp`, `/sse`                                  | MCP transports (Bearer token from `/token` required)     |
+
+Adding the server to clients:
+
+- **Claude.ai web** — Settings → Connectors → *Add custom connector* → URL
+  `<deployed>/mcp` → click *Connect* → the browser opens `/authorize` →
+  enter `MCP_PASSWORD` → done.
+- **Claude Desktop / Claude Code** — point an `.mcp.json` entry at the
+  `mcp-remote` shim, which handles the OAuth dance for stdio clients:
+
+  ```json
+  {
+    "mcpServers": {
+      "simplex": {
+        "command": "npx",
+        "args": ["-y", "mcp-remote", "https://<deployed>/mcp"]
+      }
+    }
+  }
+  ```
+
+  The first run pops a browser for `/authorize`; subsequent runs reuse the
+  cached refresh token under `~/.mcp-auth/`.
 
 ## Worked example
 
