@@ -28,6 +28,17 @@
     }
   ],
 
+  // Required by @cloudflare/workers-oauth-provider — stores client registrations,
+  // grants, and tokens. Create the namespace once with:
+  //   npx wrangler kv namespace create OAUTH_KV
+  // …then paste the printed id below.
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "be38ba1214474826a2d24bdec46d0b8d"
+    }
+  ],
+
   "observability": {
     "enabled": true
   }
