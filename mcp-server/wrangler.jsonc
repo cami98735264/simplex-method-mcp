@@ -39,6 +39,15 @@
     }
   ],
 
+  // Hourly garbage collection: invokes the `scheduled` handler in src/index.ts,
+  // which calls OAuthProvider.purgeExpiredData() to evict orphaned grants and
+  // tokens. KV TTLs already expire each record on its own; this is defense
+  // in depth (catches grants whose client was deleted, tokens whose grant
+  // was revoked, etc.).
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+
   "observability": {
     "enabled": true
   }

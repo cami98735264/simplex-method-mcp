@@ -253,7 +253,7 @@ const defaultHandler: ExportedHandler<Env> = {
   },
 };
 
-export default new OAuthProvider({
+const oauthProvider = new OAuthProvider({
   apiHandlers: {
     "/mcp": mcpHandler,
     "/sse": sseHandler,
@@ -263,3 +263,23 @@ export default new OAuthProvider({
   tokenEndpoint: "/token",
   clientRegistrationEndpoint: "/register",
 });
+
+export default {
+  fetch(req: Request, env: Env, ctx: ExecutionContext) {
+    return oauthProvider.fetch(req, env, ctx);
+  },
+  // Hourly cron (see wrangler.jsonc `triggers.crons`). Evicts orphaned and
+  // expired OAuth records from KV. Safe to call repeatedly — already-deleted
+  // records disappear, so subsequent runs only walk fresh state.
+  async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
+    const result = await oauthProvider.purgeExpiredData(env, {
+      purgeOrphanedGrants: true,
+      purgeExpiredGrants: true,
+      purgeOrphanedTokens: true,
+    });
+    console.log(
+      `oauth purge: grants ${result.grantsPurged}/${result.grantsChecked}, ` +
+        `tokens ${result.tokensPurged}/${result.tokensChecked}, done=${result.done}`,
+    );
+  },
+} satisfies ExportedHandler<Env>;

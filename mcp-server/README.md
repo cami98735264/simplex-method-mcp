@@ -184,7 +184,10 @@ Both are surfaced in the JSON result and the final block of the `.xlsx`.
 
 ## Out of scope (v1)
 
-- Auth (OAuth / API key) — server is authless.
+- Per-user identity — the OAuth login uses a single shared `MCP_PASSWORD`;
+  every issued grant is owned by the synthetic user `simplex-user`. Replace
+  the `/authorize` handler with a real IdP (GitHub, Google, Workers Access)
+  if you need distinct users.
 - Two-phase method, sensitivity analysis, dual values — the Python reference
   is Big-M only; this port matches that for v1.
 - LaTeX rendering of the steps — the JSON `steps[]` and the `.xlsx` already
